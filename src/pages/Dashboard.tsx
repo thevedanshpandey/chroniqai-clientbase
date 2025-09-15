@@ -6,73 +6,123 @@ import {
   MessageCircle, 
   Calendar 
 } from "lucide-react";
+import { useEffect } from "react";
 import { MetricCard } from "@/components/MetricCard";
 import { TrendChart } from "@/components/charts/TrendChart";
 import { FunnelChart } from "@/components/charts/FunnelChart";
 import { PieChart } from "@/components/charts/PieChart";
 import { RatesCard } from "@/components/RatesCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  mockMetrics, 
-  mockTrendData, 
-  mockFunnelData, 
-  mockMessageStatusData,
-  calculateRates 
-} from "@/data/mockData";
+import { useSheetData } from "@/hooks/useSheetData";
+import { useAuth } from "@/hooks/useAuth";
 
-export function Dashboard() {
+interface DashboardProps {
+  onRefreshData?: () => void;
+}
+
+export function Dashboard({ onRefreshData }: DashboardProps) {
+  const { user } = useAuth();
+  const { metrics, trendData, fetchSheetData } = useSheetData();
+
+  useEffect(() => {
+    fetchSheetData();
+  }, [fetchSheetData]);
+
+  useEffect(() => {
+    if (onRefreshData) {
+      onRefreshData = fetchSheetData;
+    }
+  }, [fetchSheetData, onRefreshData]);
+
+  if (!metrics) {
+    return (
+      <div className="space-y-6 p-6 animate-fade-in">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-neon-blue mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading dashboard data...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const calculateRates = () => {
+    const { connectionsSent, connectionsAccepted, messagesSent, repliesReceived, meetingsBooked } = metrics;
+    
+    return {
+      acceptanceRate: connectionsSent.weekly > 0 ? Math.round((connectionsAccepted.weekly / connectionsSent.weekly) * 100) : 0,
+      replyRate: messagesSent.weekly > 0 ? Math.round((repliesReceived.weekly / messagesSent.weekly) * 100) : 0,
+      meetingRate: repliesReceived.weekly > 0 ? Math.round((meetingsBooked.weekly / repliesReceived.weekly) * 100) : 0,
+    };
+  };
+
   const rates = calculateRates();
 
   const metricCards = [
     {
       title: "Connection Requests Sent",
-      ...mockMetrics.connectionsSent,
+      ...metrics.connectionsSent,
       icon: Users,
       trend: 12,
       color: "blue" as const,
     },
     {
       title: "Connection Requests Accepted",
-      ...mockMetrics.connectionsAccepted,
+      ...metrics.connectionsAccepted,
       icon: UserCheck,
       trend: 8,
       color: "green" as const,
     },
     {
       title: "Messages Sent", 
-      ...mockMetrics.messagesSent,
+      ...metrics.messagesSent,
       icon: MessageSquare,
       trend: -3,
       color: "purple" as const,
     },
     {
       title: "Messages Seen",
-      ...mockMetrics.messagesSeen,
+      ...metrics.messagesSeen,
       icon: Eye,
       trend: 5,
       color: "blue" as const,
     },
     {
       title: "Replies Received",
-      ...mockMetrics.repliesReceived,
+      ...metrics.repliesReceived,
       icon: MessageCircle,
       trend: 15,
       color: "green" as const,
     },
     {
       title: "Meetings Booked",
-      ...mockMetrics.meetingsBooked,
+      ...metrics.meetingsBooked,
       icon: Calendar,
       trend: 25,
       color: "red" as const,
     },
   ];
 
+  // Generate funnel and pie chart data from live metrics
+  const funnelData = [
+    { stage: "Requests Sent", value: metrics.connectionsSent.weekly, color: "#00d4ff" },
+    { stage: "Accepted", value: metrics.connectionsAccepted.weekly, color: "#00ff88" },
+    { stage: "Messages Sent", value: metrics.messagesSent.weekly, color: "#8b5cf6" },
+    { stage: "Replies", value: metrics.repliesReceived.weekly, color: "#ff4444" },
+    { stage: "Meetings", value: metrics.meetingsBooked.weekly, color: "#fbbf24" },
+  ];
+
+  const messageStatusData = [
+    { name: "Seen", value: metrics.messagesSeen.weekly, color: "#00ff88" },
+    { name: "Not Seen", value: metrics.messagesSent.weekly - metrics.messagesSeen.weekly, color: "#374151" },
+  ];
+
   return (
     <div className="space-y-6 p-6 animate-fade-in">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground mb-2">LinkedIn Outreach Dashboard</h1>
+        <h1 className="text-3xl font-bold text-foreground mb-2">{user?.client_name} - LinkedIn Outreach Dashboard</h1>
         <p className="text-muted-foreground">Track your outreach performance and conversion metrics</p>
       </div>
 
@@ -95,13 +145,13 @@ export function Dashboard() {
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="lg:col-span-2">
-          <TrendChart data={mockTrendData} />
+          <TrendChart data={trendData} />
         </div>
         
-        <FunnelChart data={mockFunnelData} />
+        <FunnelChart data={funnelData} />
         
         <PieChart 
-          data={mockMessageStatusData} 
+          data={messageStatusData} 
           title="Message Status Overview"
         />
       </div>
