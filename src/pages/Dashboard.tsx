@@ -16,23 +16,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSheetData } from "@/hooks/useSheetData";
 import { useAuth } from "@/hooks/useAuth";
 
-interface DashboardProps {
-  onRefreshData?: () => void;
-}
-
-export function Dashboard({ onRefreshData }: DashboardProps) {
+export function Dashboard() {
   const { user } = useAuth();
   const { metrics, trendData, fetchSheetData } = useSheetData();
 
   useEffect(() => {
-    fetchSheetData();
-  }, [fetchSheetData]);
-
-  useEffect(() => {
-    if (onRefreshData) {
-      onRefreshData = fetchSheetData;
+    if (user) {
+      fetchSheetData();
     }
-  }, [fetchSheetData, onRefreshData]);
+  }, [user, fetchSheetData]);
 
   if (!metrics) {
     return (
@@ -122,7 +114,9 @@ export function Dashboard({ onRefreshData }: DashboardProps) {
     <div className="space-y-6 p-6 animate-fade-in">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground mb-2">{user?.client_name} - LinkedIn Outreach Dashboard</h1>
+        <h1 className="text-3xl font-bold text-foreground mb-2">
+          {user?.client_name} Dashboard
+        </h1>
         <p className="text-muted-foreground">Track your outreach performance and conversion metrics</p>
       </div>
 
