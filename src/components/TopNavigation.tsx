@@ -1,6 +1,5 @@
-import { useState } from "react";
-import { Bell, Settings, User, ChevronDown, Menu } from "lucide-react";
-import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
+import { Bell, Settings, User, ChevronDown, RefreshCw } from "lucide-react";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -10,47 +9,40 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from "@/hooks/useAuth";
 
-export function TopNavigation() {
-  const [selectedClient, setSelectedClient] = useState("DharatalAI");
-  
-  const clients = [
-    { name: "DharatalAI", status: "active" },
-    { name: "Mercato Agency", status: "active" },
-    { name: "Danish", status: "active" },
-  ];
+interface TopNavigationProps {
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
+}
+
+export function TopNavigation({ onRefresh, isRefreshing }: TopNavigationProps) {
+  const { user, signOut } = useAuth();
 
   return (
     <header className="h-16 bg-card border-b border-border/50 flex items-center justify-between px-6">
       <div className="flex items-center space-x-4">
         <SidebarTrigger className="lg:hidden" />
         
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex items-center space-x-2 hover:bg-secondary/50">
-              <div className="w-2 h-2 bg-neon-green rounded-full animate-pulse"></div>
-              <span className="font-semibold text-foreground">{selectedClient}</span>
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-48">
-            {clients.map((client) => (
-              <DropdownMenuItem
-                key={client.name}
-                onClick={() => setSelectedClient(client.name)}
-                className="flex items-center space-x-2"
-              >
-                <div className={`w-2 h-2 rounded-full ${
-                  client.status === 'active' ? 'bg-neon-green' : 'bg-muted-foreground'
-                }`}></div>
-                <span>{client.name}</span>
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center space-x-2">
+          <div className="w-2 h-2 bg-neon-green rounded-full animate-pulse"></div>
+          <span className="font-semibold text-foreground">{user?.client_name || 'Client Dashboard'}</span>
+        </div>
       </div>
 
       <div className="flex items-center space-x-3">
+        {onRefresh && (
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="hover:bg-secondary/50"
+            onClick={onRefresh}
+            disabled={isRefreshing}
+          >
+            <RefreshCw className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+          </Button>
+        )}
+
         <Button variant="ghost" size="icon" className="hover:bg-secondary/50">
           <Bell className="h-5 w-5" />
         </Button>
@@ -75,7 +67,12 @@ export function TopNavigation() {
             <DropdownMenuItem>Profile</DropdownMenuItem>
             <DropdownMenuItem>Settings</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">Logout</DropdownMenuItem>
+            <DropdownMenuItem 
+              className="text-destructive"
+              onClick={signOut}
+            >
+              Logout
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
