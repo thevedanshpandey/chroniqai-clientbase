@@ -53,15 +53,10 @@ export function useSheetData() {
       const today = new Date().toISOString().split('T')[0];
       const todayData = data.find(row => row.date === today) || { connections: 0, accepted: 0, messages: 0, seen: 0, replies: 0, meetings: 0 };
       
-      // Calculate weekly (Monday to Sunday of current week)
-      const now = new Date();
-      const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, ...
-      const daysFromMonday = currentDay === 0 ? 6 : currentDay - 1; // Sunday = 6 days from Monday
-      const mondayThisWeek = new Date(now);
-      mondayThisWeek.setDate(now.getDate() - daysFromMonday);
-      mondayThisWeek.setHours(0, 0, 0, 0); // Start of Monday
-      
-      const weeklyData = data.filter(row => new Date(row.date) >= mondayThisWeek);
+      // Calculate weekly (last 7 days)
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      const weeklyData = data.filter(row => new Date(row.date) >= weekAgo);
       
       const weeklyTotals = weeklyData.reduce(
         (acc, row) => ({
