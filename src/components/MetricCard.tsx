@@ -10,6 +10,7 @@ interface MetricCardProps {
   icon: LucideIcon;
   trend?: number;
   color?: "blue" | "green" | "purple" | "red";
+  mode?: "today" | "week" | "total";
 }
 
 export function MetricCard({ 
@@ -19,7 +20,8 @@ export function MetricCard({
   lifetime, 
   icon: Icon, 
   trend,
-  color = "blue" 
+  color = "blue",
+  mode = "week"
 }: MetricCardProps) {
   const colorClasses = {
     blue: "text-neon-blue border-neon-blue/20 shadow-glow-primary",
@@ -58,18 +60,24 @@ export function MetricCard({
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <span className="text-xs text-muted-foreground">Today</span>
-            <span className={`text-2xl font-bold ${colorClasses[color]}`}>{today.toLocaleString()}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-xs text-muted-foreground">This Week</span>
-            <span className="text-lg font-semibold text-foreground">{weekly.toLocaleString()}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-xs text-muted-foreground">Lifetime</span>
-            <span className="text-sm text-muted-foreground">{lifetime.toLocaleString()}</span>
-          </div>
+          {mode === "today" && (
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-muted-foreground">Today</span>
+              <span className={`text-3xl font-bold ${colorClasses[color]}`}>{today.toLocaleString()}</span>
+            </div>
+          )}
+          {mode === "week" && (
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-muted-foreground">This Week</span>
+              <span className={`text-3xl font-bold ${colorClasses[color]}`}>{weekly.toLocaleString()}</span>
+            </div>
+          )}
+          {mode === "total" && (
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-muted-foreground">Total</span>
+              <span className={`text-3xl font-bold ${colorClasses[color]}`}>{lifetime.toLocaleString()}</span>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

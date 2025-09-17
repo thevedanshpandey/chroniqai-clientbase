@@ -6,8 +6,9 @@ import {
   MessageCircle, 
   Calendar 
 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { MetricCard } from "@/components/MetricCard";
+import { ModeSelector } from "@/components/ModeSelector";
 import { TrendChart } from "@/components/charts/TrendChart";
 import { FunnelChart } from "@/components/charts/FunnelChart";
 import { PieChart } from "@/components/charts/PieChart";
@@ -16,9 +17,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSheetData } from "@/hooks/useSheetData";
 import { useAuth } from "@/hooks/useAuth";
 
+type Mode = "today" | "week" | "total";
+
 export function Dashboard() {
   const { user } = useAuth();
   const { metrics, trendData, fetchSheetData } = useSheetData();
+  const [selectedMode, setSelectedMode] = useState<Mode>("week");
 
   useEffect(() => {
     if (user) {
@@ -42,10 +46,25 @@ export function Dashboard() {
   const calculateRates = () => {
     const { connectionsSent, connectionsAccepted, messagesSent, repliesReceived, meetingsBooked } = metrics;
     
+    const getMetricValue = (metric: { today: number; weekly: number; lifetime: number }) => {
+      switch (selectedMode) {
+        case "today": return metric.today;
+        case "week": return metric.weekly;
+        case "total": return metric.lifetime;
+        default: return metric.weekly;
+      }
+    };
+    
+    const connections = getMetricValue(connectionsSent);
+    const accepted = getMetricValue(connectionsAccepted);
+    const messages = getMetricValue(messagesSent);
+    const replies = getMetricValue(repliesReceived);
+    const meetings = getMetricValue(meetingsBooked);
+    
     return {
-      acceptanceRate: connectionsSent.weekly > 0 ? Math.round((connectionsAccepted.weekly / connectionsSent.weekly) * 100) : 0,
-      replyRate: messagesSent.weekly > 0 ? Math.round((repliesReceived.weekly / messagesSent.weekly) * 100) : 0,
-      meetingRate: repliesReceived.weekly > 0 ? Math.round((meetingsBooked.weekly / repliesReceived.weekly) * 100) : 0,
+      acceptanceRate: connections > 0 ? Math.round((accepted / connections) * 100) : 0,
+      replyRate: messages > 0 ? Math.round((replies / messages) * 100) : 0,
+      meetingRate: replies > 0 ? Math.round((meetings / replies) * 100) : 0,
     };
   };
 
@@ -96,28 +115,44 @@ export function Dashboard() {
     },
   ];
 
-  // Generate funnel and pie chart data from live metrics
+  const getMetricValue = (metric: { today: number; weekly: number; lifetime: number }) => {
+    switch (selectedMode) {
+      case "today": return metric.today;
+      case "week": return metric.weekly;
+      case "total": return metric.lifetime;
+      default: return metric.weekly;
+    }
+  };
+
+  // Generate funnel and pie chart data from live metrics based on selected mode
   const funnelData = [
-    { stage: "Requests Sent", value: metrics.connectionsSent.weekly, color: "#00d4ff" },
-    { stage: "Accepted", value: metrics.connectionsAccepted.weekly, color: "#00ff88" },
-    { stage: "Messages Sent", value: metrics.messagesSent.weekly, color: "#8b5cf6" },
-    { stage: "Replies", value: metrics.repliesReceived.weekly, color: "#ff4444" },
-    { stage: "Meetings", value: metrics.meetingsBooked.weekly, color: "#fbbf24" },
+    { stage: "Requests Sent", value: getMetricValue(metrics.connectionsSent), color: "#00d4ff" },
+    { stage: "Accepted", value: getMetricValue(metrics.connectionsAccepted), color: "#00ff88" },
+    { stage: "Messages Sent", value: getMetricValue(metrics.messagesSent), color: "#8b5cf6" },
+    { stage: "Replies", value: getMetricValue(metrics.repliesReceived), color: "#ff4444" },
+    { stage: "Meetings", value: getMetricValue(metrics.meetingsBooked), color: "#fbbf24" },
   ];
 
+  const messagesSentValue = getMetricValue(metrics.messagesSent);
+  const messagesSeenValue = getMetricValue(metrics.messagesSeen);
   const messageStatusData = [
-    { name: "Seen", value: metrics.messagesSeen.weekly, color: "#00ff88" },
-    { name: "Not Seen", value: metrics.messagesSent.weekly - metrics.messagesSeen.weekly, color: "#374151" },
+    { name: "Seen", value: messagesSeenValue, color: "#00ff88" },
+    { name: "Not Seen", value: Math.max(0, messagesSentValue - messagesSeenValue), color: "#374151" },
   ];
 
   return (
     <div className="space-y-6 p-6 animate-fade-in">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground mb-2">
-          {user?.client_name} Dashboard
-        </h1>
-        <p className="text-muted-foreground">Track your outreach performance and conversion metrics</p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground mb-2">
+              {user?.client_name} Dashboard
+            </h1>
+            <p className="text-muted-foreground">Track your outreach performance and conversion metrics</p>
+          </div>
+          <ModeSelector selectedMode={selectedMode} onModeChange={setSelectedMode} />
+        </div>
       </div>
 
       {/* Metrics Grid */}
@@ -132,6 +167,7 @@ export function Dashboard() {
             icon={metric.icon}
             trend={metric.trend}
             color={metric.color}
+            mode={selectedMode}
           />
         ))}
       </div>
