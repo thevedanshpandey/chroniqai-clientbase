@@ -32,27 +32,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (username: string, password: string) => {
     try {
-      const { data: clients, error } = await supabase
-        .from("clients")
-        .select("*")
-        .eq("username", username)
-        .single();
+      // Use the authenticate_client function to securely verify credentials and get client data
+      const { data, error } = await (supabase as any).rpc('authenticate_client', {
+        input_username: username,
+        input_password: password
+      });
 
-      if (error || !clients) {
+      if (error || !data || !Array.isArray(data) || data.length === 0 || !data[0].success) {
         return { success: false, error: "Invalid credentials" };
       }
 
-      // Simple password validation (in production, use proper hashing)
-      const expectedPassword = `${username}@22`;
-      if (password !== expectedPassword) {
-        return { success: false, error: "Invalid credentials" };
-      }
-
+      const result = data[0];
       const clientData: Client = {
-        id: clients.id,
-        username: clients.username,
-        client_name: clients.client_name,
-        sheet_url: clients.sheet_url,
+        id: result.client_id,
+        username: username,
+        client_name: result.client_name,
+        sheet_url: result.sheet_url,
       };
 
       setUser(clientData);
