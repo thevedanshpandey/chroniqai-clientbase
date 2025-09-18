@@ -99,6 +99,31 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      authenticate_client: {
+        Args: { input_password: string; input_username: string }
+        Returns: {
+          client_id: string
+          client_name: string
+          sheet_url: string
+          success: boolean
+        }[]
+      }
+      get_client_outreach_data: {
+        Args: { input_client_id: string }
+        Returns: {
+          client_id: string
+          connection_requests_accepted: number
+          connection_requests_sent: number
+          created_at: string
+          date_recorded: string
+          id: string
+          meetings_booked: number
+          messages_seen: number
+          messages_sent: number
+          replies_received: number
+          updated_at: string
+        }[]
+      }
       verify_client_password: {
         Args: { input_password: string; input_username: string }
         Returns: boolean
