@@ -14,13 +14,17 @@ import { PieChart } from "@/components/charts/PieChart";
 import { RatesCard } from "@/components/RatesCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSheetData } from "@/hooks/useSheetData";
+import { useAuth } from "@/hooks/useAuth";
 
 export function Dashboard() {
+  const { user } = useAuth();
   const { metrics, trendData, fetchSheetData } = useSheetData();
 
   useEffect(() => {
-    fetchSheetData();
-  }, [fetchSheetData]);
+    if (user) {
+      fetchSheetData();
+    }
+  }, [user, fetchSheetData]);
 
   if (!metrics) {
     return (
@@ -111,7 +115,7 @@ export function Dashboard() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-foreground mb-2">
-          Client Dashboard
+          {user?.client_name} Dashboard
         </h1>
         <p className="text-muted-foreground">Track your outreach performance and conversion metrics</p>
       </div>

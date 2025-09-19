@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
+import { useAuth } from "./useAuth";
 import { useToast } from "./use-toast";
-import { supabase } from "@/integrations/supabase/client";
 
 export interface OutreachMetrics {
   connectionsSent: { today: number; weekly: number; lifetime: number };
@@ -20,25 +20,37 @@ export interface TrendDataPoint {
 }
 
 export function useSheetData() {
+  const { user } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [metrics, setMetrics] = useState<OutreachMetrics | null>(null);
   const [trendData, setTrendData] = useState<TrendDataPoint[]>([]);
 
   const fetchSheetData = useCallback(async () => {
+    if (!user?.sheet_url) return;
 
     setIsLoading(true);
     try {
-      // Use mock data since authentication is removed
-      const mockData = [
-        { date: '2024-01-15', connections: 25, accepted: 15, messages: 12, seen: 10, replies: 8, meetings: 3 },
-        { date: '2024-01-16', connections: 30, accepted: 18, messages: 15, seen: 12, replies: 9, meetings: 4 },
-        { date: '2024-01-17', connections: 22, accepted: 12, messages: 10, seen: 8, replies: 6, meetings: 2 },
-        { date: '2024-01-18', connections: 28, accepted: 16, messages: 14, seen: 11, replies: 7, meetings: 3 },
-        { date: '2024-01-19', connections: 35, accepted: 20, messages: 18, seen: 15, replies: 10, meetings: 5 },
-      ];
+      // Fetch live data from the user's Google Sheet
+      const response = await fetch(user.sheet_url);
+      const csvText = await response.text();
+      
+      // Parse CSV data (simple parsing - assumes specific format)
+      const lines = csvText.trim().split('\n');
+      const data = lines.slice(1).map(line => {
+        const columns = line.split(',');
+        return {
+          date: columns[0] || '',
+          connections: parseInt(columns[1]) || 0,
+          accepted: parseInt(columns[2]) || 0,
+          messages: parseInt(columns[3]) || 0,
+          seen: parseInt(columns[4]) || 0,
+          replies: parseInt(columns[5]) || 0,
+          meetings: parseInt(columns[6]) || 0,
+        };
+      });
 
-      processMetricsData(mockData);
+      processMetricsData(data);
 
       toast({
         title: "Data refreshed",
@@ -54,7 +66,7 @@ export function useSheetData() {
     } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  }, [user?.sheet_url, toast]);
 
   const processMetricsData = (data: any[]) => {
     // Calculate metrics

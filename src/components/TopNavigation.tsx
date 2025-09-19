@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from "@/hooks/useAuth";
 
 interface TopNavigationProps {
   onRefresh?: () => void;
@@ -16,6 +17,8 @@ interface TopNavigationProps {
 }
 
 export function TopNavigation({ onRefresh, isRefreshing }: TopNavigationProps) {
+  const { user, signOut } = useAuth();
+
   return (
     <header className="h-16 bg-card border-b border-border/50 flex items-center justify-between px-6">
       <div className="flex items-center space-x-4">
@@ -23,7 +26,7 @@ export function TopNavigation({ onRefresh, isRefreshing }: TopNavigationProps) {
         
         <div className="flex items-center space-x-2">
           <div className="w-2 h-2 bg-neon-green rounded-full animate-pulse"></div>
-          <span className="font-semibold text-foreground">Client Dashboard</span>
+          <span className="font-semibold text-foreground">{user?.client_name || 'Client Dashboard'}</span>
         </div>
       </div>
 
@@ -63,6 +66,13 @@ export function TopNavigation({ onRefresh, isRefreshing }: TopNavigationProps) {
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuItem>Profile</DropdownMenuItem>
             <DropdownMenuItem>Settings</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem 
+              className="text-destructive"
+              onClick={signOut}
+            >
+              Logout
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
