@@ -1,5 +1,4 @@
 import { useState, useCallback } from "react";
-import { useAuth } from "./useAuth";
 import { useToast } from "./use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -21,57 +20,25 @@ export interface TrendDataPoint {
 }
 
 export function useSheetData() {
-  const { user } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [metrics, setMetrics] = useState<OutreachMetrics | null>(null);
   const [trendData, setTrendData] = useState<TrendDataPoint[]>([]);
 
   const fetchSheetData = useCallback(async () => {
-    if (!user?.sheet_url || !user?.id) return;
 
     setIsLoading(true);
     try {
-      // First, try to get data from Supabase using our secure function
-      const { data: dbData, error: dbError } = await (supabase as any).rpc('get_client_outreach_data', {
-        input_client_id: user.id
-      });
+      // Use mock data since authentication is removed
+      const mockData = [
+        { date: '2024-01-15', connections: 25, accepted: 15, messages: 12, seen: 10, replies: 8, meetings: 3 },
+        { date: '2024-01-16', connections: 30, accepted: 18, messages: 15, seen: 12, replies: 9, meetings: 4 },
+        { date: '2024-01-17', connections: 22, accepted: 12, messages: 10, seen: 8, replies: 6, meetings: 2 },
+        { date: '2024-01-18', connections: 28, accepted: 16, messages: 14, seen: 11, replies: 7, meetings: 3 },
+        { date: '2024-01-19', connections: 35, accepted: 20, messages: 18, seen: 15, replies: 10, meetings: 5 },
+      ];
 
-      if (!dbError && dbData && dbData.length > 0) {
-        // Use database data
-        const data = dbData.map((row: any) => ({
-          date: row.date_recorded,
-          connections: row.connection_requests_sent || 0,
-          accepted: row.connection_requests_accepted || 0,
-          messages: row.messages_sent || 0,
-          seen: row.messages_seen || 0,
-          replies: row.replies_received || 0,
-          meetings: row.meetings_booked || 0,
-        }));
-
-        processMetricsData(data);
-      } else {
-        // Fallback to Google Sheets data
-        const response = await fetch(user.sheet_url);
-        const csvText = await response.text();
-        
-        // Parse CSV data (simple parsing - assumes specific format)
-        const lines = csvText.trim().split('\n');
-        const data = lines.slice(1).map(line => {
-          const columns = line.split(',');
-          return {
-            date: columns[0] || '',
-            connections: parseInt(columns[1]) || 0,
-            accepted: parseInt(columns[2]) || 0,
-            messages: parseInt(columns[3]) || 0,
-            seen: parseInt(columns[4]) || 0,
-            replies: parseInt(columns[5]) || 0,
-            meetings: parseInt(columns[6]) || 0,
-          };
-        });
-
-        processMetricsData(data);
-      }
+      processMetricsData(mockData);
 
       toast({
         title: "Data refreshed",
@@ -87,7 +54,7 @@ export function useSheetData() {
     } finally {
       setIsLoading(false);
     }
-  }, [user?.sheet_url, user?.id, toast]);
+  }, [toast]);
 
   const processMetricsData = (data: any[]) => {
     // Calculate metrics
