@@ -87,38 +87,23 @@ export function useSheetData() {
   }, [user?.sheet_url, toast]);
 
   const processMetricsData = (data: any[]) => {
-    // Sort data by date to get latest entries
-    const sortedData = data.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    // Sort data by date to get chronological order (oldest to newest)
+    const sortedData = data.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     
-    // Get today's data (latest available date or 0 if no data)
-    const todayData = sortedData.length > 0 ? sortedData[0] : { connections: 0, accepted: 0, messages: 0, seen: 0, replies: 0, meetings: 0 };
+    // Get today's data (last row - latest entry)
+    const todayData = sortedData.length > 0 ? sortedData[sortedData.length - 1] : { connections: 0, accepted: 0, messages: 0, seen: 0, replies: 0, meetings: 0 };
     
-    // Get previous day's data for growth calculation
-    const previousDayData = sortedData.length > 1 ? sortedData[1] : { connections: 0, accepted: 0, messages: 0, seen: 0, replies: 0, meetings: 0 };
+    // Get previous day's data for growth calculation (second to last row)
+    const previousDayData = sortedData.length > 1 ? sortedData[sortedData.length - 2] : { connections: 0, accepted: 0, messages: 0, seen: 0, replies: 0, meetings: 0 };
     
-    // Calculate current week (Monday to Sunday)
-    const now = new Date();
-    const startOfWeek = new Date(now);
-    const day = startOfWeek.getDay();
-    const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1);
-    startOfWeek.setDate(diff);
-    startOfWeek.setHours(0, 0, 0, 0);
-
-    const weeklyData = data.filter(row => {
-      const rowDate = new Date(row.date);
-      return rowDate >= startOfWeek && rowDate <= now;
-    });
+    // Get last 6 rows for "This Week" calculation
+    const weekRowCount = Math.min(6, sortedData.length);
+    const weeklyData = sortedData.slice(-weekRowCount);
     
-    // Calculate previous week for growth calculation
-    const startOfLastWeek = new Date(startOfWeek);
-    startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
-    const endOfLastWeek = new Date(startOfWeek);
-    endOfLastWeek.setDate(endOfLastWeek.getDate() - 1);
-    
-    const previousWeekData = data.filter(row => {
-      const rowDate = new Date(row.date);
-      return rowDate >= startOfLastWeek && rowDate <= endOfLastWeek;
-    });
+    // Get previous 6 rows for comparison (rows before the current week rows)
+    const prevWeekStartIndex = Math.max(0, sortedData.length - (weekRowCount * 2));
+    const prevWeekEndIndex = sortedData.length - weekRowCount;
+    const previousWeekData = sortedData.slice(prevWeekStartIndex, prevWeekEndIndex);
     
     const weeklyTotals = weeklyData.reduce(
       (acc, row) => ({
