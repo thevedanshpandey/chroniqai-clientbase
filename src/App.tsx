@@ -7,7 +7,6 @@ import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "./hooks/useAuth";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Layout } from "./components/Layout";
-import { Footer } from "./components/Footer";
 import { Dashboard } from "./pages/Dashboard";
 import { Reports } from "./pages/Reports";
 import { Export } from "./pages/Export";
@@ -25,26 +24,21 @@ const App = () => (
         <Sonner />
         <AuthProvider>
           <BrowserRouter>
-            <div className="min-h-screen flex flex-col bg-background">
-              <div className="flex-1">
-                <Routes>
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/" element={
-                    <ProtectedRoute>
-                      <Layout />
-                    </ProtectedRoute>
-                  }>
-                    <Route index element={<Dashboard />} />
-                    <Route path="reports" element={<Reports />} />
-                    <Route path="export" element={<Export />} />
-                    <Route path="about-founder" element={<AboutFounder />} />
-                  </Route>
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </div>
-              <Footer />
-            </div>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/" element={
+                <ProtectedRoute>
+                  <Layout />
+                </ProtectedRoute>
+              }>
+                <Route index element={<Dashboard />} />
+                <Route path="reports" element={<Reports />} />
+                <Route path="export" element={<Export />} />
+                <Route path="about-founder" element={<AboutFounder />} />
+              </Route>
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
           </BrowserRouter>
         </AuthProvider>
       </TooltipProvider>
