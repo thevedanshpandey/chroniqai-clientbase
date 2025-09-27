@@ -115,7 +115,7 @@ export function Footer() {
             © {new Date().getFullYear()} ChroniqAI. All rights reserved.
           </div>
           <div className="flex items-center space-x-6 text-sm text-muted-foreground">
-            <span>Built with ❤️ by Vedansh Pandey</span>
+            <span>Built with ❤️ by <Link to="/about-founder" className="text-neon-blue hover:text-neon-purple transition-colors duration-300 font-medium">Vedansh Pandey</Link></span>
             <div className="flex items-center space-x-1">
               <div className="w-2 h-2 bg-neon-green rounded-full animate-pulse"></div>
               <span>AI Analytics Active</span>
