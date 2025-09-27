@@ -3,7 +3,6 @@ import { useState, useCallback } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { TopNavigation } from "@/components/TopNavigation";
-import { Footer } from "@/components/Footer";
 import { useSheetData } from "@/hooks/useSheetData";
 
 export function Layout() {
@@ -22,7 +21,6 @@ export function Layout() {
           <main className="flex-1 overflow-auto">
             <Outlet />
           </main>
-          <Footer />
         </div>
       </div>
     </SidebarProvider>
