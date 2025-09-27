@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BarChart3, FileDown, Home, TrendingUp } from "lucide-react";
+import { BarChart3, FileDown, Home, TrendingUp, User } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 
 import {
@@ -18,6 +18,7 @@ const navigationItems = [
   { title: "Dashboard", url: "/", icon: Home },
   { title: "Reports", url: "/reports", icon: BarChart3 },
   { title: "Export", url: "/export", icon: FileDown },
+  { title: "About Founder", url: "/about-founder", icon: User },
 ];
 
 export function AppSidebar() {
