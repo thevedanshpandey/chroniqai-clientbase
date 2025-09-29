@@ -28,6 +28,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Homepage />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/about-founder" element={<AboutFounder />} />
               <Route path="/dashboard" element={
                 <ProtectedRoute>
                   <Layout />
@@ -36,7 +37,6 @@ const App = () => (
                 <Route index element={<Dashboard />} />
                 <Route path="reports" element={<Reports />} />
                 <Route path="export" element={<Export />} />
-                <Route path="about-founder" element={<AboutFounder />} />
               </Route>
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
