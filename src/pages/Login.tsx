@@ -16,7 +16,7 @@ export function Login() {
   const { toast } = useToast();
 
   if (user) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {

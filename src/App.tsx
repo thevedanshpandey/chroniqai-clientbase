@@ -12,6 +12,7 @@ import { Reports } from "./pages/Reports";
 import { Export } from "./pages/Export";
 import { AboutFounder } from "./pages/AboutFounder";
 import { Login } from "./pages/Login";
+import { Homepage } from "./pages/Homepage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,8 +26,9 @@ const App = () => (
         <AuthProvider>
           <BrowserRouter>
             <Routes>
+              <Route path="/" element={<Homepage />} />
               <Route path="/login" element={<Login />} />
-              <Route path="/" element={
+              <Route path="/dashboard" element={
                 <ProtectedRoute>
                   <Layout />
                 </ProtectedRoute>
