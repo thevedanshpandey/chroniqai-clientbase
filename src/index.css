@@ -90,7 +90,106 @@ All colors MUST be HSL.
     }
   }
 
+  @keyframes neon-flicker {
+    0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+      opacity: 1;
+      text-shadow: 
+        0 0 10px currentColor,
+        0 0 20px currentColor,
+        0 0 40px currentColor;
+    }
+    20%, 24%, 55% {
+      opacity: 0.8;
+      text-shadow: none;
+    }
+  }
+
+  @keyframes neon-pulse {
+    0%, 100% {
+      opacity: 1;
+      text-shadow: 
+        0 0 10px currentColor,
+        0 0 20px currentColor;
+    }
+    50% {
+      opacity: 0.8;
+      text-shadow: 
+        0 0 20px currentColor,
+        0 0 40px currentColor,
+        0 0 60px currentColor;
+    }
+  }
+
+  @keyframes float-particles {
+    0%, 100% {
+      transform: translateY(0) translateX(0);
+    }
+    25% {
+      transform: translateY(-20px) translateX(10px);
+    }
+    50% {
+      transform: translateY(-40px) translateX(-10px);
+    }
+    75% {
+      transform: translateY(-20px) translateX(5px);
+    }
+  }
+
+  @keyframes grid-glow {
+    0%, 100% {
+      opacity: 0.3;
+    }
+    50% {
+      opacity: 0.6;
+    }
+  }
+
   .animate-fade-in {
     animation: fade-in 0.5s ease-out;
+  }
+
+  .animate-neon-flicker {
+    animation: neon-flicker 3s infinite;
+  }
+
+  .animate-neon-pulse {
+    animation: neon-pulse 2s ease-in-out infinite;
+  }
+
+  .animate-float-particles {
+    animation: float-particles 8s ease-in-out infinite;
+  }
+
+  /* Cursor glow trail */
+  .cursor-glow {
+    cursor: none;
+  }
+
+  .cursor-glow::after {
+    content: '';
+    position: fixed;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: hsl(var(--neon-blue));
+    pointer-events: none;
+    mix-blend-mode: screen;
+    filter: blur(10px);
+    opacity: 0.5;
+    z-index: 9999;
+  }
+
+  /* Scroll snap for scene transitions */
+  .scroll-snap-container {
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+    overflow-y: scroll;
+    height: 100vh;
+  }
+
+  .scroll-snap-section {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    min-height: 100vh;
   }
 }
