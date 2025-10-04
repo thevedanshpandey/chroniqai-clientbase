@@ -4,7 +4,15 @@ import {
   MessageSquare, 
   Eye, 
   MessageCircle, 
-  Calendar 
+  Calendar,
+  Send,
+  CheckCircle2,
+  MessageCircleMore,
+  PhoneCall,
+  UserPlus,
+  Clock,
+  ThumbsUp,
+  TrendingUp
 } from "lucide-react";
 import { useEffect } from "react";
 import { MetricCard } from "@/components/MetricCard";
@@ -120,20 +128,121 @@ export function Dashboard() {
         <p className="text-muted-foreground">Track your outreach performance and conversion metrics</p>
       </div>
 
-      {/* Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {metricCards.map((metric, index) => (
+      {/* LinkedIn Outreach Section */}
+      <div className="space-y-4">
+        <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+          <Users className="h-6 w-6 text-neon-blue" />
+          LinkedIn Outreach
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <MetricCard
-            key={metric.title}
-            title={metric.title}
-            today={metric.today}
-            weekly={metric.weekly}
-            lifetime={metric.lifetime}
-            icon={metric.icon}
-            trend={metric.trend}
-            color={metric.color}
+            title="Total Connections Sent"
+            today={metrics.connectionsSent.today}
+            weekly={metrics.connectionsSent.weekly}
+            lifetime={metrics.connectionsSent.lifetime}
+            icon={Send}
+            trend={metrics.growth.weekly.connections}
+            color="blue"
           />
-        ))}
+          <MetricCard
+            title="Connection Accepted"
+            today={metrics.connectionsAccepted.today}
+            weekly={metrics.connectionsAccepted.weekly}
+            lifetime={metrics.connectionsAccepted.lifetime}
+            icon={CheckCircle2}
+            trend={metrics.growth.weekly.accepted}
+            color="green"
+          />
+          <MetricCard
+            title="Outreach Sent"
+            today={metrics.messagesSent.today}
+            weekly={metrics.messagesSent.weekly}
+            lifetime={metrics.messagesSent.lifetime}
+            icon={MessageCircleMore}
+            trend={metrics.growth.weekly.messages}
+            color="purple"
+          />
+        </div>
+      </div>
+
+      {/* WhatsApp Outreach Section */}
+      <div className="space-y-4">
+        <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+          <PhoneCall className="h-6 w-6 text-neon-green" />
+          WhatsApp Outreach
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <MetricCard
+            title="Total Leads Found"
+            today={0}
+            weekly={0}
+            lifetime={0}
+            icon={UserPlus}
+            trend={0}
+            color="blue"
+          />
+          <MetricCard
+            title="Outreach Done"
+            today={0}
+            weekly={0}
+            lifetime={0}
+            icon={MessageSquare}
+            trend={0}
+            color="green"
+          />
+          <MetricCard
+            title="Follow Up Pending"
+            today={0}
+            weekly={0}
+            lifetime={0}
+            icon={Clock}
+            trend={0}
+            color="purple"
+          />
+          <MetricCard
+            title="Green Signal"
+            today={0}
+            weekly={0}
+            lifetime={0}
+            icon={ThumbsUp}
+            trend={0}
+            color="green"
+          />
+        </div>
+      </div>
+
+      {/* Total Outreach Done Section */}
+      <div className="space-y-4">
+        <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+          <TrendingUp className="h-6 w-6 text-neon-purple" />
+          Total Outreach Done
+        </h2>
+        <div className="grid grid-cols-1 gap-6">
+          <Card className="bg-card border border-border/50 hover:shadow-glow-primary/20 transition-all duration-300">
+            <CardHeader>
+              <CardTitle className="text-foreground flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-neon-purple" />
+                Combined Outreach Metrics
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">LinkedIn Total</p>
+                  <p className="text-3xl font-bold text-neon-blue">{metrics.messagesSent.lifetime}</p>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">WhatsApp Total</p>
+                  <p className="text-3xl font-bold text-neon-green">0</p>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">Overall Total</p>
+                  <p className="text-3xl font-bold text-neon-purple">{metrics.messagesSent.lifetime}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       {/* Charts Section */}
