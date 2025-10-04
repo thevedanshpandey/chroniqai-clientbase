@@ -48,74 +48,30 @@ export function Dashboard() {
   }
 
   const calculateRates = () => {
-    const { connectionsSent, connectionsAccepted, messagesSent, repliesReceived, meetingsBooked } = metrics;
+    const { linkedinConnectionsSent, linkedinConnectionsAccepted, linkedinOutreachSent, whatsappOutreachDone } = metrics;
     
     return {
-      acceptanceRate: connectionsSent.weekly > 0 ? Math.round((connectionsAccepted.weekly / connectionsSent.weekly) * 100) : 0,
-      replyRate: messagesSent.weekly > 0 ? Math.round((repliesReceived.weekly / messagesSent.weekly) * 100) : 0,
-      meetingRate: repliesReceived.weekly > 0 ? Math.round((meetingsBooked.weekly / repliesReceived.weekly) * 100) : 0,
+      acceptanceRate: linkedinConnectionsSent.weekly > 0 ? Math.round((linkedinConnectionsAccepted.weekly / linkedinConnectionsSent.weekly) * 100) : 0,
+      replyRate: linkedinOutreachSent.weekly > 0 ? Math.round((whatsappOutreachDone.weekly / linkedinOutreachSent.weekly) * 100) : 0,
+      meetingRate: whatsappOutreachDone.weekly > 0 ? Math.round((whatsappOutreachDone.weekly / linkedinOutreachSent.weekly) * 100) : 0,
     };
   };
 
   const rates = calculateRates();
 
-  const metricCards = [
-    {
-      title: "Connection Requests Sent",
-      ...metrics.connectionsSent,
-      icon: Users,
-      trend: metrics.growth.weekly.connections,
-      color: "blue" as const,
-    },
-    {
-      title: "Connection Requests Accepted",
-      ...metrics.connectionsAccepted,
-      icon: UserCheck,
-      trend: metrics.growth.weekly.accepted,
-      color: "green" as const,
-    },
-    {
-      title: "Messages Sent", 
-      ...metrics.messagesSent,
-      icon: MessageSquare,
-      trend: metrics.growth.weekly.messages,
-      color: "purple" as const,
-    },
-    {
-      title: "Messages Seen",
-      ...metrics.messagesSeen,
-      icon: Eye,
-      trend: metrics.growth.weekly.seen,
-      color: "blue" as const,
-    },
-    {
-      title: "Replies Received",
-      ...metrics.repliesReceived,
-      icon: MessageCircle,
-      trend: metrics.growth.weekly.replies,
-      color: "green" as const,
-    },
-    {
-      title: "Meetings Booked",
-      ...metrics.meetingsBooked,
-      icon: Calendar,
-      trend: metrics.growth.weekly.meetings,
-      color: "red" as const,
-    },
-  ];
-
   // Generate funnel and pie chart data from live metrics
   const funnelData = [
-    { stage: "Requests Sent", value: metrics.connectionsSent.weekly, color: "#00d4ff" },
-    { stage: "Accepted", value: metrics.connectionsAccepted.weekly, color: "#00ff88" },
-    { stage: "Messages Sent", value: metrics.messagesSent.weekly, color: "#8b5cf6" },
-    { stage: "Replies", value: metrics.repliesReceived.weekly, color: "#ff4444" },
-    { stage: "Meetings", value: metrics.meetingsBooked.weekly, color: "#fbbf24" },
+    { stage: "LinkedIn Connections", value: metrics.linkedinConnectionsSent.weekly, color: "#00d4ff" },
+    { stage: "Accepted", value: metrics.linkedinConnectionsAccepted.weekly, color: "#00ff88" },
+    { stage: "LinkedIn Outreach", value: metrics.linkedinOutreachSent.weekly, color: "#8b5cf6" },
+    { stage: "WhatsApp Outreach", value: metrics.whatsappOutreachDone.weekly, color: "#ff4444" },
+    { stage: "Green Signals", value: metrics.whatsappGreenSignal.weekly, color: "#fbbf24" },
   ];
 
-  const messageStatusData = [
-    { name: "Seen", value: metrics.messagesSeen.weekly, color: "#00ff88" },
-    { name: "Not Seen", value: metrics.messagesSent.weekly - metrics.messagesSeen.weekly, color: "#374151" },
+  const whatsappStatusData = [
+    { name: "Outreach Done", value: metrics.whatsappOutreachDone.weekly, color: "#00ff88" },
+    { name: "Follow Up Pending", value: metrics.whatsappFollowUpPending.weekly, color: "#fbbf24" },
+    { name: "Green Signal", value: metrics.whatsappGreenSignal.weekly, color: "#8b5cf6" },
   ];
 
   return (
@@ -137,29 +93,29 @@ export function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <MetricCard
             title="Total Connections Sent"
-            today={metrics.connectionsSent.today}
-            weekly={metrics.connectionsSent.weekly}
-            lifetime={metrics.connectionsSent.lifetime}
+            today={metrics.linkedinConnectionsSent.today}
+            weekly={metrics.linkedinConnectionsSent.weekly}
+            lifetime={metrics.linkedinConnectionsSent.lifetime}
             icon={Send}
-            trend={metrics.growth.weekly.connections}
+            trend={metrics.growth.weekly.linkedinConnections}
             color="blue"
           />
           <MetricCard
             title="Connection Accepted"
-            today={metrics.connectionsAccepted.today}
-            weekly={metrics.connectionsAccepted.weekly}
-            lifetime={metrics.connectionsAccepted.lifetime}
+            today={metrics.linkedinConnectionsAccepted.today}
+            weekly={metrics.linkedinConnectionsAccepted.weekly}
+            lifetime={metrics.linkedinConnectionsAccepted.lifetime}
             icon={CheckCircle2}
-            trend={metrics.growth.weekly.accepted}
+            trend={metrics.growth.weekly.linkedinAccepted}
             color="green"
           />
           <MetricCard
             title="Outreach Sent"
-            today={metrics.messagesSent.today}
-            weekly={metrics.messagesSent.weekly}
-            lifetime={metrics.messagesSent.lifetime}
+            today={metrics.linkedinOutreachSent.today}
+            weekly={metrics.linkedinOutreachSent.weekly}
+            lifetime={metrics.linkedinOutreachSent.lifetime}
             icon={MessageCircleMore}
-            trend={metrics.growth.weekly.messages}
+            trend={metrics.growth.weekly.linkedinOutreach}
             color="purple"
           />
         </div>
@@ -174,38 +130,38 @@ export function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <MetricCard
             title="Total Leads Found"
-            today={0}
-            weekly={0}
-            lifetime={0}
+            today={metrics.whatsappLeadsFound.today}
+            weekly={metrics.whatsappLeadsFound.weekly}
+            lifetime={metrics.whatsappLeadsFound.lifetime}
             icon={UserPlus}
-            trend={0}
+            trend={metrics.growth.weekly.whatsappLeads}
             color="blue"
           />
           <MetricCard
             title="Outreach Done"
-            today={0}
-            weekly={0}
-            lifetime={0}
+            today={metrics.whatsappOutreachDone.today}
+            weekly={metrics.whatsappOutreachDone.weekly}
+            lifetime={metrics.whatsappOutreachDone.lifetime}
             icon={MessageSquare}
-            trend={0}
+            trend={metrics.growth.weekly.whatsappOutreach}
             color="green"
           />
           <MetricCard
             title="Follow Up Pending"
-            today={0}
-            weekly={0}
-            lifetime={0}
+            today={metrics.whatsappFollowUpPending.today}
+            weekly={metrics.whatsappFollowUpPending.weekly}
+            lifetime={metrics.whatsappFollowUpPending.lifetime}
             icon={Clock}
-            trend={0}
+            trend={metrics.growth.weekly.whatsappFollowUp}
             color="purple"
           />
           <MetricCard
             title="Green Signal"
-            today={0}
-            weekly={0}
-            lifetime={0}
+            today={metrics.whatsappGreenSignal.today}
+            weekly={metrics.whatsappGreenSignal.weekly}
+            lifetime={metrics.whatsappGreenSignal.lifetime}
             icon={ThumbsUp}
-            trend={0}
+            trend={metrics.growth.weekly.whatsappGreen}
             color="green"
           />
         </div>
@@ -229,15 +185,15 @@ export function Dashboard() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
                   <p className="text-sm text-muted-foreground">LinkedIn Total</p>
-                  <p className="text-3xl font-bold text-neon-blue">{metrics.messagesSent.lifetime}</p>
+                  <p className="text-3xl font-bold text-neon-blue">{metrics.linkedinOutreachSent.lifetime}</p>
                 </div>
                 <div className="space-y-2">
                   <p className="text-sm text-muted-foreground">WhatsApp Total</p>
-                  <p className="text-3xl font-bold text-neon-green">0</p>
+                  <p className="text-3xl font-bold text-neon-green">{metrics.whatsappOutreachDone.lifetime}</p>
                 </div>
                 <div className="space-y-2">
                   <p className="text-sm text-muted-foreground">Overall Total</p>
-                  <p className="text-3xl font-bold text-neon-purple">{metrics.messagesSent.lifetime}</p>
+                  <p className="text-3xl font-bold text-neon-purple">{metrics.totalOutreachDone.lifetime}</p>
                 </div>
               </div>
             </CardContent>
@@ -254,8 +210,8 @@ export function Dashboard() {
         <FunnelChart data={funnelData} />
         
         <PieChart 
-          data={messageStatusData} 
-          title="Message Status Overview"
+          data={whatsappStatusData} 
+          title="WhatsApp Status Overview"
         />
       </div>
 

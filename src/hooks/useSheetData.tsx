@@ -3,28 +3,37 @@ import { useAuth } from "./useAuth";
 import { useToast } from "./use-toast";
 
 export interface OutreachMetrics {
-  connectionsSent: { today: number; weekly: number; lifetime: number };
-  connectionsAccepted: { today: number; weekly: number; lifetime: number };
-  messagesSent: { today: number; weekly: number; lifetime: number };
-  messagesSeen: { today: number; weekly: number; lifetime: number };
-  repliesReceived: { today: number; weekly: number; lifetime: number };
-  meetingsBooked: { today: number; weekly: number; lifetime: number };
+  // LinkedIn metrics
+  linkedinConnectionsSent: { today: number; weekly: number; lifetime: number };
+  linkedinConnectionsAccepted: { today: number; weekly: number; lifetime: number };
+  linkedinOutreachSent: { today: number; weekly: number; lifetime: number };
+  // WhatsApp metrics
+  whatsappLeadsFound: { today: number; weekly: number; lifetime: number };
+  whatsappOutreachDone: { today: number; weekly: number; lifetime: number };
+  whatsappFollowUpPending: { today: number; weekly: number; lifetime: number };
+  whatsappGreenSignal: { today: number; weekly: number; lifetime: number };
+  // Total outreach
+  totalOutreachDone: { today: number; weekly: number; lifetime: number };
   growth: {
     today: {
-      connections: number;
-      accepted: number;
-      messages: number;
-      seen: number;
-      replies: number;
-      meetings: number;
+      linkedinConnections: number;
+      linkedinAccepted: number;
+      linkedinOutreach: number;
+      whatsappLeads: number;
+      whatsappOutreach: number;
+      whatsappFollowUp: number;
+      whatsappGreen: number;
+      totalOutreach: number;
     };
     weekly: {
-      connections: number;
-      accepted: number;
-      messages: number;
-      seen: number;
-      replies: number;
-      meetings: number;
+      linkedinConnections: number;
+      linkedinAccepted: number;
+      linkedinOutreach: number;
+      whatsappLeads: number;
+      whatsappOutreach: number;
+      whatsappFollowUp: number;
+      whatsappGreen: number;
+      totalOutreach: number;
     };
   };
 }
@@ -53,18 +62,21 @@ export function useSheetData() {
       const response = await fetch(user.sheet_url);
       const csvText = await response.text();
       
-      // Parse CSV data (simple parsing - assumes specific format)
+      // Parse CSV data with new column structure
       const lines = csvText.trim().split('\n');
       const data = lines.slice(1).map(line => {
         const columns = line.split(',');
         return {
           date: columns[0] || '',
-          connections: parseInt(columns[1]) || 0,
-          accepted: parseInt(columns[2]) || 0,
-          messages: parseInt(columns[3]) || 0,
-          seen: parseInt(columns[4]) || 0,
-          replies: parseInt(columns[5]) || 0,
-          meetings: parseInt(columns[6]) || 0,
+          linkedinConnectionsSent: parseInt(columns[1]) || 0,
+          linkedinConnectionsAccepted: parseInt(columns[2]) || 0,
+          linkedinOutreachSent: parseInt(columns[3]) || 0,
+          whatsappLeadsFound: parseInt(columns[4]) || 0,
+          whatsappOutreachDone: parseInt(columns[5]) || 0,
+          whatsappFollowUpPending: parseInt(columns[6]) || 0,
+          whatsappGreenSignal: parseInt(columns[7]) || 0,
+          totalOutreachDone: parseInt(columns[8]) || 0,
+          lastUpdated: columns[9] || '',
         };
       });
 
@@ -90,11 +102,23 @@ export function useSheetData() {
     // Sort data by date to get chronological order (oldest to newest)
     const sortedData = data.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     
+    // Default empty data object
+    const emptyData = {
+      linkedinConnectionsSent: 0,
+      linkedinConnectionsAccepted: 0,
+      linkedinOutreachSent: 0,
+      whatsappLeadsFound: 0,
+      whatsappOutreachDone: 0,
+      whatsappFollowUpPending: 0,
+      whatsappGreenSignal: 0,
+      totalOutreachDone: 0,
+    };
+    
     // Get today's data (last row - latest entry)
-    const todayData = sortedData.length > 0 ? sortedData[sortedData.length - 1] : { connections: 0, accepted: 0, messages: 0, seen: 0, replies: 0, meetings: 0 };
+    const todayData = sortedData.length > 0 ? sortedData[sortedData.length - 1] : emptyData;
     
     // Get previous day's data for growth calculation (second to last row)
-    const previousDayData = sortedData.length > 1 ? sortedData[sortedData.length - 2] : { connections: 0, accepted: 0, messages: 0, seen: 0, replies: 0, meetings: 0 };
+    const previousDayData = sortedData.length > 1 ? sortedData[sortedData.length - 2] : emptyData;
     
     // Get last 6 rows for "This Week" calculation
     const weekRowCount = Math.min(6, sortedData.length);
@@ -107,39 +131,45 @@ export function useSheetData() {
     
     const weeklyTotals = weeklyData.reduce(
       (acc, row) => ({
-        connections: acc.connections + row.connections,
-        accepted: acc.accepted + row.accepted,
-        messages: acc.messages + row.messages,
-        seen: acc.seen + row.seen,
-        replies: acc.replies + row.replies,
-        meetings: acc.meetings + row.meetings,
+        linkedinConnectionsSent: acc.linkedinConnectionsSent + row.linkedinConnectionsSent,
+        linkedinConnectionsAccepted: acc.linkedinConnectionsAccepted + row.linkedinConnectionsAccepted,
+        linkedinOutreachSent: acc.linkedinOutreachSent + row.linkedinOutreachSent,
+        whatsappLeadsFound: acc.whatsappLeadsFound + row.whatsappLeadsFound,
+        whatsappOutreachDone: acc.whatsappOutreachDone + row.whatsappOutreachDone,
+        whatsappFollowUpPending: acc.whatsappFollowUpPending + row.whatsappFollowUpPending,
+        whatsappGreenSignal: acc.whatsappGreenSignal + row.whatsappGreenSignal,
+        totalOutreachDone: acc.totalOutreachDone + row.totalOutreachDone,
       }),
-      { connections: 0, accepted: 0, messages: 0, seen: 0, replies: 0, meetings: 0 }
+      emptyData
     );
 
     const previousWeekTotals = previousWeekData.reduce(
       (acc, row) => ({
-        connections: acc.connections + row.connections,
-        accepted: acc.accepted + row.accepted,
-        messages: acc.messages + row.messages,
-        seen: acc.seen + row.seen,
-        replies: acc.replies + row.replies,
-        meetings: acc.meetings + row.meetings,
+        linkedinConnectionsSent: acc.linkedinConnectionsSent + row.linkedinConnectionsSent,
+        linkedinConnectionsAccepted: acc.linkedinConnectionsAccepted + row.linkedinConnectionsAccepted,
+        linkedinOutreachSent: acc.linkedinOutreachSent + row.linkedinOutreachSent,
+        whatsappLeadsFound: acc.whatsappLeadsFound + row.whatsappLeadsFound,
+        whatsappOutreachDone: acc.whatsappOutreachDone + row.whatsappOutreachDone,
+        whatsappFollowUpPending: acc.whatsappFollowUpPending + row.whatsappFollowUpPending,
+        whatsappGreenSignal: acc.whatsappGreenSignal + row.whatsappGreenSignal,
+        totalOutreachDone: acc.totalOutreachDone + row.totalOutreachDone,
       }),
-      { connections: 0, accepted: 0, messages: 0, seen: 0, replies: 0, meetings: 0 }
+      emptyData
     );
 
     // Calculate lifetime totals
     const lifetimeTotals = data.reduce(
       (acc, row) => ({
-        connections: acc.connections + row.connections,
-        accepted: acc.accepted + row.accepted,
-        messages: acc.messages + row.messages,
-        seen: acc.seen + row.seen,
-        replies: acc.replies + row.replies,
-        meetings: acc.meetings + row.meetings,
+        linkedinConnectionsSent: acc.linkedinConnectionsSent + row.linkedinConnectionsSent,
+        linkedinConnectionsAccepted: acc.linkedinConnectionsAccepted + row.linkedinConnectionsAccepted,
+        linkedinOutreachSent: acc.linkedinOutreachSent + row.linkedinOutreachSent,
+        whatsappLeadsFound: acc.whatsappLeadsFound + row.whatsappLeadsFound,
+        whatsappOutreachDone: acc.whatsappOutreachDone + row.whatsappOutreachDone,
+        whatsappFollowUpPending: acc.whatsappFollowUpPending + row.whatsappFollowUpPending,
+        whatsappGreenSignal: acc.whatsappGreenSignal + row.whatsappGreenSignal,
+        totalOutreachDone: acc.totalOutreachDone + row.totalOutreachDone,
       }),
-      { connections: 0, accepted: 0, messages: 0, seen: 0, replies: 0, meetings: 0 }
+      emptyData
     );
 
     // Calculate growth percentages
@@ -149,53 +179,67 @@ export function useSheetData() {
     };
 
     const todayGrowth = {
-      connections: calculateGrowth(todayData.connections, previousDayData.connections),
-      accepted: calculateGrowth(todayData.accepted, previousDayData.accepted),
-      messages: calculateGrowth(todayData.messages, previousDayData.messages),
-      seen: calculateGrowth(todayData.seen, previousDayData.seen),
-      replies: calculateGrowth(todayData.replies, previousDayData.replies),
-      meetings: calculateGrowth(todayData.meetings, previousDayData.meetings),
+      linkedinConnections: calculateGrowth(todayData.linkedinConnectionsSent, previousDayData.linkedinConnectionsSent),
+      linkedinAccepted: calculateGrowth(todayData.linkedinConnectionsAccepted, previousDayData.linkedinConnectionsAccepted),
+      linkedinOutreach: calculateGrowth(todayData.linkedinOutreachSent, previousDayData.linkedinOutreachSent),
+      whatsappLeads: calculateGrowth(todayData.whatsappLeadsFound, previousDayData.whatsappLeadsFound),
+      whatsappOutreach: calculateGrowth(todayData.whatsappOutreachDone, previousDayData.whatsappOutreachDone),
+      whatsappFollowUp: calculateGrowth(todayData.whatsappFollowUpPending, previousDayData.whatsappFollowUpPending),
+      whatsappGreen: calculateGrowth(todayData.whatsappGreenSignal, previousDayData.whatsappGreenSignal),
+      totalOutreach: calculateGrowth(todayData.totalOutreachDone, previousDayData.totalOutreachDone),
     };
 
     const weeklyGrowth = {
-      connections: calculateGrowth(weeklyTotals.connections, previousWeekTotals.connections),
-      accepted: calculateGrowth(weeklyTotals.accepted, previousWeekTotals.accepted),
-      messages: calculateGrowth(weeklyTotals.messages, previousWeekTotals.messages),
-      seen: calculateGrowth(weeklyTotals.seen, previousWeekTotals.seen),
-      replies: calculateGrowth(weeklyTotals.replies, previousWeekTotals.replies),
-      meetings: calculateGrowth(weeklyTotals.meetings, previousWeekTotals.meetings),
+      linkedinConnections: calculateGrowth(weeklyTotals.linkedinConnectionsSent, previousWeekTotals.linkedinConnectionsSent),
+      linkedinAccepted: calculateGrowth(weeklyTotals.linkedinConnectionsAccepted, previousWeekTotals.linkedinConnectionsAccepted),
+      linkedinOutreach: calculateGrowth(weeklyTotals.linkedinOutreachSent, previousWeekTotals.linkedinOutreachSent),
+      whatsappLeads: calculateGrowth(weeklyTotals.whatsappLeadsFound, previousWeekTotals.whatsappLeadsFound),
+      whatsappOutreach: calculateGrowth(weeklyTotals.whatsappOutreachDone, previousWeekTotals.whatsappOutreachDone),
+      whatsappFollowUp: calculateGrowth(weeklyTotals.whatsappFollowUpPending, previousWeekTotals.whatsappFollowUpPending),
+      whatsappGreen: calculateGrowth(weeklyTotals.whatsappGreenSignal, previousWeekTotals.whatsappGreenSignal),
+      totalOutreach: calculateGrowth(weeklyTotals.totalOutreachDone, previousWeekTotals.totalOutreachDone),
     };
 
     const newMetrics: OutreachMetrics = {
-      connectionsSent: {
-        today: todayData.connections,
-        weekly: weeklyTotals.connections,
-        lifetime: lifetimeTotals.connections,
+      linkedinConnectionsSent: {
+        today: todayData.linkedinConnectionsSent,
+        weekly: weeklyTotals.linkedinConnectionsSent,
+        lifetime: lifetimeTotals.linkedinConnectionsSent,
       },
-      connectionsAccepted: {
-        today: todayData.accepted,
-        weekly: weeklyTotals.accepted,
-        lifetime: lifetimeTotals.accepted,
+      linkedinConnectionsAccepted: {
+        today: todayData.linkedinConnectionsAccepted,
+        weekly: weeklyTotals.linkedinConnectionsAccepted,
+        lifetime: lifetimeTotals.linkedinConnectionsAccepted,
       },
-      messagesSent: {
-        today: todayData.messages,
-        weekly: weeklyTotals.messages,
-        lifetime: lifetimeTotals.messages,
+      linkedinOutreachSent: {
+        today: todayData.linkedinOutreachSent,
+        weekly: weeklyTotals.linkedinOutreachSent,
+        lifetime: lifetimeTotals.linkedinOutreachSent,
       },
-      messagesSeen: {
-        today: todayData.seen,
-        weekly: weeklyTotals.seen,
-        lifetime: lifetimeTotals.seen,
+      whatsappLeadsFound: {
+        today: todayData.whatsappLeadsFound,
+        weekly: weeklyTotals.whatsappLeadsFound,
+        lifetime: lifetimeTotals.whatsappLeadsFound,
       },
-      repliesReceived: {
-        today: todayData.replies,
-        weekly: weeklyTotals.replies,
-        lifetime: lifetimeTotals.replies,
+      whatsappOutreachDone: {
+        today: todayData.whatsappOutreachDone,
+        weekly: weeklyTotals.whatsappOutreachDone,
+        lifetime: lifetimeTotals.whatsappOutreachDone,
       },
-      meetingsBooked: {
-        today: todayData.meetings,
-        weekly: weeklyTotals.meetings,
-        lifetime: lifetimeTotals.meetings,
+      whatsappFollowUpPending: {
+        today: todayData.whatsappFollowUpPending,
+        weekly: weeklyTotals.whatsappFollowUpPending,
+        lifetime: lifetimeTotals.whatsappFollowUpPending,
+      },
+      whatsappGreenSignal: {
+        today: todayData.whatsappGreenSignal,
+        weekly: weeklyTotals.whatsappGreenSignal,
+        lifetime: lifetimeTotals.whatsappGreenSignal,
+      },
+      totalOutreachDone: {
+        today: todayData.totalOutreachDone,
+        weekly: weeklyTotals.totalOutreachDone,
+        lifetime: lifetimeTotals.totalOutreachDone,
       },
       growth: {
         today: todayGrowth,
@@ -210,10 +254,10 @@ export function useSheetData() {
       .filter(row => new Date(row.date) >= thirtyDaysAgo)
       .map(row => ({
         date: row.date,
-        connections: row.connections,
-        messages: row.messages,
-        replies: row.replies,
-        meetings: row.meetings,
+        connections: row.linkedinConnectionsSent,
+        messages: row.linkedinOutreachSent,
+        replies: row.whatsappOutreachDone,
+        meetings: row.totalOutreachDone,
       }))
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
