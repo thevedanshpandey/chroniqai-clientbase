@@ -115,20 +115,10 @@ export function useSheetData() {
     };
     
     // Get today's data (last row - latest entry)
-    const todayDataRaw = sortedData.length > 0 ? sortedData[sortedData.length - 1] : emptyData;
-    const todayWhatsappTotal = todayDataRaw.whatsappLeadsFound + todayDataRaw.whatsappOutreachDone + todayDataRaw.whatsappFollowUpPending + todayDataRaw.whatsappGreenSignal;
-    const todayData = {
-      ...todayDataRaw,
-      totalOutreachDone: todayDataRaw.linkedinConnectionsSent + todayWhatsappTotal
-    };
+    const todayData = sortedData.length > 0 ? sortedData[sortedData.length - 1] : emptyData;
     
     // Get previous day's data for growth calculation (second to last row)
-    const previousDayDataRaw = sortedData.length > 1 ? sortedData[sortedData.length - 2] : emptyData;
-    const previousWhatsappTotal = previousDayDataRaw.whatsappLeadsFound + previousDayDataRaw.whatsappOutreachDone + previousDayDataRaw.whatsappFollowUpPending + previousDayDataRaw.whatsappGreenSignal;
-    const previousDayData = {
-      ...previousDayDataRaw,
-      totalOutreachDone: previousDayDataRaw.linkedinConnectionsSent + previousWhatsappTotal
-    };
+    const previousDayData = sortedData.length > 1 ? sortedData[sortedData.length - 2] : emptyData;
     
     // Get last 6 rows for "This Week" calculation
     const weekRowCount = Math.min(6, sortedData.length);
@@ -140,60 +130,45 @@ export function useSheetData() {
     const previousWeekData = sortedData.slice(prevWeekStartIndex, prevWeekEndIndex);
     
     const weeklyTotals = weeklyData.reduce(
-      (acc, row) => {
-        const whatsappTotal = row.whatsappLeadsFound + row.whatsappOutreachDone + row.whatsappFollowUpPending + row.whatsappGreenSignal;
-        const calculatedTotal = row.linkedinConnectionsSent + whatsappTotal;
-        
-        return {
-          linkedinConnectionsSent: acc.linkedinConnectionsSent + row.linkedinConnectionsSent,
-          linkedinConnectionsAccepted: acc.linkedinConnectionsAccepted + row.linkedinConnectionsAccepted,
-          linkedinOutreachSent: acc.linkedinOutreachSent + row.linkedinOutreachSent,
-          whatsappLeadsFound: acc.whatsappLeadsFound + row.whatsappLeadsFound,
-          whatsappOutreachDone: acc.whatsappOutreachDone + row.whatsappOutreachDone,
-          whatsappFollowUpPending: acc.whatsappFollowUpPending + row.whatsappFollowUpPending,
-          whatsappGreenSignal: acc.whatsappGreenSignal + row.whatsappGreenSignal,
-          totalOutreachDone: acc.totalOutreachDone + calculatedTotal,
-        };
-      },
+      (acc, row) => ({
+        linkedinConnectionsSent: acc.linkedinConnectionsSent + row.linkedinConnectionsSent,
+        linkedinConnectionsAccepted: acc.linkedinConnectionsAccepted + row.linkedinConnectionsAccepted,
+        linkedinOutreachSent: acc.linkedinOutreachSent + row.linkedinOutreachSent,
+        whatsappLeadsFound: acc.whatsappLeadsFound + row.whatsappLeadsFound,
+        whatsappOutreachDone: acc.whatsappOutreachDone + row.whatsappOutreachDone,
+        whatsappFollowUpPending: acc.whatsappFollowUpPending + row.whatsappFollowUpPending,
+        whatsappGreenSignal: acc.whatsappGreenSignal + row.whatsappGreenSignal,
+        totalOutreachDone: acc.totalOutreachDone + row.totalOutreachDone,
+      }),
       emptyData
     );
 
     const previousWeekTotals = previousWeekData.reduce(
-      (acc, row) => {
-        const whatsappTotal = row.whatsappLeadsFound + row.whatsappOutreachDone + row.whatsappFollowUpPending + row.whatsappGreenSignal;
-        const calculatedTotal = row.linkedinConnectionsSent + whatsappTotal;
-        
-        return {
-          linkedinConnectionsSent: acc.linkedinConnectionsSent + row.linkedinConnectionsSent,
-          linkedinConnectionsAccepted: acc.linkedinConnectionsAccepted + row.linkedinConnectionsAccepted,
-          linkedinOutreachSent: acc.linkedinOutreachSent + row.linkedinOutreachSent,
-          whatsappLeadsFound: acc.whatsappLeadsFound + row.whatsappLeadsFound,
-          whatsappOutreachDone: acc.whatsappOutreachDone + row.whatsappOutreachDone,
-          whatsappFollowUpPending: acc.whatsappFollowUpPending + row.whatsappFollowUpPending,
-          whatsappGreenSignal: acc.whatsappGreenSignal + row.whatsappGreenSignal,
-          totalOutreachDone: acc.totalOutreachDone + calculatedTotal,
-        };
-      },
+      (acc, row) => ({
+        linkedinConnectionsSent: acc.linkedinConnectionsSent + row.linkedinConnectionsSent,
+        linkedinConnectionsAccepted: acc.linkedinConnectionsAccepted + row.linkedinConnectionsAccepted,
+        linkedinOutreachSent: acc.linkedinOutreachSent + row.linkedinOutreachSent,
+        whatsappLeadsFound: acc.whatsappLeadsFound + row.whatsappLeadsFound,
+        whatsappOutreachDone: acc.whatsappOutreachDone + row.whatsappOutreachDone,
+        whatsappFollowUpPending: acc.whatsappFollowUpPending + row.whatsappFollowUpPending,
+        whatsappGreenSignal: acc.whatsappGreenSignal + row.whatsappGreenSignal,
+        totalOutreachDone: acc.totalOutreachDone + row.totalOutreachDone,
+      }),
       emptyData
     );
 
     // Calculate lifetime totals
     const lifetimeTotals = data.reduce(
-      (acc, row) => {
-        const whatsappTotal = row.whatsappLeadsFound + row.whatsappOutreachDone + row.whatsappFollowUpPending + row.whatsappGreenSignal;
-        const calculatedTotal = row.linkedinConnectionsSent + whatsappTotal;
-        
-        return {
-          linkedinConnectionsSent: acc.linkedinConnectionsSent + row.linkedinConnectionsSent,
-          linkedinConnectionsAccepted: acc.linkedinConnectionsAccepted + row.linkedinConnectionsAccepted,
-          linkedinOutreachSent: acc.linkedinOutreachSent + row.linkedinOutreachSent,
-          whatsappLeadsFound: acc.whatsappLeadsFound + row.whatsappLeadsFound,
-          whatsappOutreachDone: acc.whatsappOutreachDone + row.whatsappOutreachDone,
-          whatsappFollowUpPending: acc.whatsappFollowUpPending + row.whatsappFollowUpPending,
-          whatsappGreenSignal: acc.whatsappGreenSignal + row.whatsappGreenSignal,
-          totalOutreachDone: acc.totalOutreachDone + calculatedTotal,
-        };
-      },
+      (acc, row) => ({
+        linkedinConnectionsSent: acc.linkedinConnectionsSent + row.linkedinConnectionsSent,
+        linkedinConnectionsAccepted: acc.linkedinConnectionsAccepted + row.linkedinConnectionsAccepted,
+        linkedinOutreachSent: acc.linkedinOutreachSent + row.linkedinOutreachSent,
+        whatsappLeadsFound: acc.whatsappLeadsFound + row.whatsappLeadsFound,
+        whatsappOutreachDone: acc.whatsappOutreachDone + row.whatsappOutreachDone,
+        whatsappFollowUpPending: acc.whatsappFollowUpPending + row.whatsappFollowUpPending,
+        whatsappGreenSignal: acc.whatsappGreenSignal + row.whatsappGreenSignal,
+        totalOutreachDone: acc.totalOutreachDone + row.totalOutreachDone,
+      }),
       emptyData
     );
 
